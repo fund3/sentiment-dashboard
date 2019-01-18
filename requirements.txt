@@ -1,6 +1,6 @@
 gunicorn==19.9.0
 requests==2.20.0
 Flask==0.12.3
-textblob=0.15.2
-nltk=3.4
+textblob==0.15.2
+nltk==3.4
 bokeh==1.0.2
