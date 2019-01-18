@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" ng-app="BitcoinSentimentsApp">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -12,6 +12,7 @@
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 
+    <!--<script src="/templates/bitcoin_sentiments.js"></script>-->
     <script>
         function submitForm(theForm) {
             document.getElementById("output").innerHTML = "";
@@ -51,9 +52,15 @@
                 <p>
                     Lorem ipsum
                 </p>
+            </div>
 
-                <form action="#" method="get" class="form-inline" onsubmit="return submitForm(this);">
-                    <button type="submit" class="btn btn-primary mb-2">Submit</button>
+            <div class="row" ng-controller="TweetTableController as tweetTable">
+                <!--<form action="#" method="get" class="form-inline" onsubmit="return submitForm(this);">-->
+                    <!--<button type="submit" class="btn btn-primary mb-2">Submit</button>-->
+                <!--</form>-->
+
+                <form action="#" ng-submit="tweetTable.getTweets()" class="form-inline">
+                    <button type="submit" class="btn btn-primary mb-2">Get Tweets</button>
                 </form>
 
                 <div class="row">
@@ -61,6 +68,27 @@
                         <div id="output"></div>
                         <div id="plot_div"></div>
                     </div>
+                </div>
+
+                <div class="col-lg-12">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">id_str</th>
+                                <th scope="col">created_at</th>
+                                <th scope="col">full_text</th>
+                                <th scope="col">subjectivity</th>
+                                <th scope="col">polarity</th>
+                            </tr>
+                        </thead>
+                        <tr ng-repeat="tweet in tweetTable.tweets">
+                            <td>{{ '{{tweet.id_str}}' }}</td>
+                            <td>{{ '{{tweet.created_at}}' }}</td>
+                            <td>{{ '{{tweet.full_text}}' }}</td>
+                            <td>{{ '{{tweet.subjectivity}}' }}</td>
+                            <td>{{ '{{tweet.polarity}}' }}</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
         </div>
@@ -72,5 +100,7 @@
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.5/angular.min.js"></script>
+<script src="{{url_for('static', filename='bitcoin_sentiments.js')}}"></script>
 </body>
 </html>

@@ -36,12 +36,12 @@ def get_tweets(env):
     tweets_response = api.search('bitcoin')
 
     # TODO: switch back to 100
-    cursor = tweepy.Cursor(api.search, q='bitcoin', lang='en', count=100, tweet_mode='extended')
+    cursor = tweepy.Cursor(api.search, q='bitcoin', lang='en', count=10, tweet_mode='extended')
 
     tweets = []
     stored_at = datetime.now()
     # TODO: switch back to 15 pages
-    for page in cursor.pages(15):
+    for page in cursor.pages(1):
         for tweet in page:
             blob = TextBlob(tweet.full_text)
             sents = blob.sentences
