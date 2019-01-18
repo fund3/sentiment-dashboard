@@ -3,6 +3,7 @@ import simplejson as json
 import bokeh.resources
 import bokeh.plotting
 import bokeh.embed
+import os
 
 app = Flask(__name__)
 
@@ -15,8 +16,18 @@ def index():
 @app.route('/get_tweets.json', methods=['GET'])
 def get_tweets():
     import cron_pull_tweets
-    with open('secrets.txt', 'r') as f:
-        params = json.load(f)
+
+    if os.path.isfile('secrets.txt'):
+        with open('secrets.txt', 'r') as f:
+            params = json.load(f)
+    else:
+        params = {
+            'tw_oauth_key': os.environ['tw_oauth_key'],
+            'tw_oauth_secret': os.environ['tw_oauth_secret'],
+            'tw_token_key': os.environ['tw_token_key'],
+            'tw_token_secret': os.environ['tw_token_secret'],
+            'es_endpoint': os.environ['es_endpoint']
+        }
 
     tweets = cron_pull_tweets.get_tweets(params)
 
