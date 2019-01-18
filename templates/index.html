@@ -8,22 +8,36 @@
 
     <title>Bitcoin Sentiments</title>
 
+    {{resources|safe}}
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+    <script>
+        function submitForm(theForm) {
+            document.getElementById("output").innerHTML = "";
+            url = '/get_tweets.json'
+            fetch(url)
+            .then(function(response) { return response.json(); })
+            .then(function(item) { console.log(item); Bokeh.embed.embed_item(item['plot']); })
+            //.then(function(item) { console.log(item); document.getElementById("output").innerHTML = JSON.stringify(item); Bokeh.embed.embed_item(item['plot']); })
+            return false;
+        }
+    </script>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-  <a class="navbar-brand" href="#">Bitcoin Sentiments</a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+    <a class="navbar-brand" href="#">Bitcoin Sentiments</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
 
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
-      </li>
-    </ul>
-  </div>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+            </li>
+        </ul>
+    </div>
 </nav>
 <div class="container">
     <div class="row">
@@ -37,6 +51,17 @@
                 <p>
                     Lorem ipsum
                 </p>
+
+                <form action="#" method="get" class="form-inline" onsubmit="return submitForm(this);">
+                    <button type="submit" class="btn btn-primary mb-2">Submit</button>
+                </form>
+
+                <div class="row">
+                    <div class="col-lg-12 text-center">
+                        <div id="output"></div>
+                        <div id="plot_div"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
