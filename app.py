@@ -39,10 +39,10 @@ def get_tweets():
         xs.append(float(t['subjectivity']))
         ys.append(float(t['polarity']))
 
-    fig = bokeh.plotting.figure(plot_width=800, plot_height=400)
+    fig = bokeh.plotting.figure(plot_width=600, plot_height=400)
     fig.xaxis.axis_label = 'subjectivity'
     fig.yaxis.axis_label = 'polarity'
-    fig.circle(x=xs, y=ys)
+    fig.circle(x=xs, y=ys, size=5)
 
     print(xs)
     print(ys)
