@@ -1,75 +1,62 @@
+import os
 from datetime import datetime
-import simplejson as json
 import tweepy
-import elasticsearch_dsl
-from elasticsearch_dsl import connections
+# from elasticsearch import Elasticsearch
+from elasticsearch_dsl import connections, Search
 from textblob import TextBlob
+import es_client
 import nltk
 nltk.download('punkt')
 
 
-# Model for storing tweets in Elasticsearch
-class ESTweet(elasticsearch_dsl.Document):
-    tid = elasticsearch_dsl.Integer()
-    created_at = elasticsearch_dsl.Date()
-    stored_at = elasticsearch_dsl.Date()
-    text = elasticsearch_dsl.Text(analyzer='snowball')
-
-
-def prepare_tweet(t, stored_at):
-    ans = ESTweet(tid=t.id_str,
-                  created_at=t.created_at,
-                  stored_at=stored_at,
-                  text=t.text)
-    return ans
-
-
-def get_tweets(env):
+def run_task(params, ntweets=3, maxpages=2):
     # Setup Twitter access:
-    auth = tweepy.OAuthHandler(env['tw_oauth_key'], env['tw_oauth_secret'])
-    auth.set_access_token(env['tw_token_key'], env['tw_token_secret'])
+    auth = tweepy.OAuthHandler(params['tw_oauth_key'], params['tw_oauth_secret'])
+    auth.set_access_token(params['tw_token_key'], params['tw_token_secret'])
     api = tweepy.API(auth)
 
     # Set default Elasticsearch client
-    connections.create_connection(hosts=[env['es_endpoint']])
+    connections.create_connection(hosts=[params['es_endpoint']])
 
-    tweets_response = api.search('bitcoin')
-
-    # TODO: switch back to 100
-    cursor = tweepy.Cursor(api.search, q='bitcoin', lang='en', count=100, tweet_mode='extended')
-
-    tweets = []
+    cursor = tweepy.Cursor(api.search, q='bitcoin', lang='en', count=ntweets, tweet_mode='extended')
     stored_at = datetime.now()
-    # TODO: switch back to 15 pages
-    for page in cursor.pages(15):
-        for tweet in page:
-            blob = TextBlob(tweet.full_text)
+
+    for page in cursor.pages(maxpages):
+        for result in page:
+            print(result)
+            blob = TextBlob(result.full_text)
             sents = blob.sentences
+            sentiment = None
             if len(sents) >= 1:
                 sent = sents[0]
                 sentiment = sent.sentiment
-            else:
-                sentiment = 'NaN'
 
-            t = {
-                'id_str': tweet.id_str,
-                'created_at': tweet.created_at.isoformat(),
-                'full_text': tweet.full_text,
-                'subjectivity': sentiment.subjectivity,
-                'polarity': sentiment.polarity
-            }
+            t = es_client.prepare_tweet(result, stored_at=stored_at, sentiment=sentiment)
 
-            tweets.append(t)
-        # tweets.extend(page)
-        # for item in page:
-        #     # TODO: Check if tweet is already stored.
-        #     t = prepare_tweet(item, stored_at)
-        #     t.save(index='tweets')
+            ans = t.save(index='tweets')
+            print(ans)
 
-    return tweets
+    # search = Search(index='tweets').query("match_all")
+    # results = search.execute()
+    # print(results.hits.total)
+    # for row in search.scan():
+    #     print(row)
+    # print(results)
+    print('done')
 
 
 if __name__ == '__main__':
-    with open('secrets.txt', 'r') as f:
-        params = json.load(f)
-    get_tweets(params)
+    if 'PRODUCTION' in os.environ:
+        params = {
+            'tw_oauth_key': os.environ['tw_oauth_key'],
+            'tw_oauth_secret': os.environ['tw_oauth_secret'],
+            'tw_token_key': os.environ['tw_token_key'],
+            'tw_token_secret': os.environ['tw_token_secret'],
+            'es_endpoint': os.environ['es_endpoint']
+        }
+    else:
+        import simplejson as json
+        with open('secrets.txt', 'r') as f:
+            params = json.load(f)
+
+    run_task(params)

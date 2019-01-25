@@ -1,9 +1,12 @@
 from flask import Flask, render_template
+import os
 import simplejson as json
 import bokeh.resources
 import bokeh.plotting
 import bokeh.embed
-import os
+from elasticsearch import Elasticsearch
+from textblob import TextBlob
+import es_client
 
 app = Flask(__name__)
 
@@ -15,7 +18,7 @@ def index():
 
 @app.route('/get_tweets.json', methods=['GET'])
 def get_tweets():
-    import cron_pull_tweets
+    # import cron_pull_tweets
 
     if os.path.isfile('secrets.txt'):
         with open('secrets.txt', 'r') as f:
@@ -29,15 +32,30 @@ def get_tweets():
             'es_endpoint': os.environ['es_endpoint']
         }
 
-    tweets = cron_pull_tweets.get_tweets(params)
+    # TODO: pull tweets from es instance
+    # tweets = cron_pull_tweets.get_tweets(params)
+
+    client = Elasticsearch(hosts=[params['es_endpoint']])
+    tweets = es_client.get_tweets(client)
 
     print(tweets)
 
     xs = []
     ys = []
     for t in tweets:
-        xs.append(float(t['subjectivity']))
-        ys.append(float(t['polarity']))
+        print(t['full_text'])
+        blob = TextBlob(t['full_text'])
+        sents = blob.sentences
+        if len(sents) >= 1:
+            sent = sents[0]
+            sentiment = sent.sentiment
+        else:
+            sentiment = None
+
+        t['subjectivity'] = sentiment.subjectivity
+        t['polarity'] = sentiment.polarity
+        xs.append(float(sentiment.subjectivity))
+        ys.append(float(sentiment.polarity))
 
     fig = bokeh.plotting.figure(plot_width=600, plot_height=400)
     fig.xaxis.axis_label = 'subjectivity'

@@ -6,4 +6,5 @@ tweepy==3.7.0
 textblob==0.15.2
 nltk==3.4
 bokeh==1.0.2
+elasticsearch==6.3.1
 elasticsearch-dsl==6.3.1
