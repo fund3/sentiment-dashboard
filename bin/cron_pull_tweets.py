@@ -1,8 +1,7 @@
 import os
 from datetime import datetime
 import tweepy
-# from elasticsearch import Elasticsearch
-from elasticsearch_dsl import connections, Search
+from elasticsearch_dsl import connections
 from textblob import TextBlob
 import es_client
 import nltk
@@ -35,13 +34,6 @@ def run_task(params, ntweets=3, maxpages=2):
 
             ans = t.save(index='tweets')
             print(ans)
-
-    # search = Search(index='tweets').query("match_all")
-    # results = search.execute()
-    # print(results.hits.total)
-    # for row in search.scan():
-    #     print(row)
-    # print(results)
     print('done')
 
 
