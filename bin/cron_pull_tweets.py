@@ -1,8 +1,7 @@
 import os
 from datetime import datetime
 import tweepy
-# from elasticsearch import Elasticsearch
-from elasticsearch_dsl import connections, Search
+from elasticsearch_dsl import connections
 from textblob import TextBlob
 import es_client
 import nltk
@@ -31,17 +30,16 @@ def run_task(params, ntweets=3, maxpages=2):
                 sent = sents[0]
                 sentiment = sent.sentiment
 
-            t = es_client.prepare_tweet(result, stored_at=stored_at, sentiment=sentiment)
-
-            ans = t.save(index='tweets')
-            print(ans)
-
-    # search = Search(index='tweets').query("match_all")
-    # results = search.execute()
-    # print(results.hits.total)
-    # for row in search.scan():
-    #     print(row)
-    # print(results)
+            tid = result.id
+            es_tweet = es_client.ESTweet.get(tid, ignore=404)
+            if not es_tweet:
+                print('new tweet')
+                t = es_client.tweet_to_estweet(result, stored_at=stored_at, sentiment=sentiment)
+                t.save(index='tweets')  # TODO: explicitly giving the index shouldn't be necessary
+                print(t)
+            else:
+                print('old tweet')
+                print(es_tweet)
     print('done')
 
 
