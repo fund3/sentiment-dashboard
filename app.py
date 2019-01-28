@@ -18,12 +18,7 @@ def index():
 
 @app.route('/get_tweets.json', methods=['GET'])
 def get_tweets():
-    # import cron_pull_tweets
-
-    if os.path.isfile('secrets.txt'):
-        with open('secrets.txt', 'r') as f:
-            params = json.load(f)
-    else:
+    if 'PRODUCTION' in os.environ:
         params = {
             'tw_oauth_key': os.environ['tw_oauth_key'],
             'tw_oauth_secret': os.environ['tw_oauth_secret'],
@@ -31,19 +26,16 @@ def get_tweets():
             'tw_token_secret': os.environ['tw_token_secret'],
             'es_endpoint': os.environ['es_endpoint']
         }
-
-    # TODO: pull tweets from es instance
-    # tweets = cron_pull_tweets.get_tweets(params)
+    else:
+        with open('secrets.txt', 'r') as f:
+            params = json.load(f)
 
     client = Elasticsearch(hosts=[params['es_endpoint']])
     tweets = es_client.get_tweets(client)
 
-    print(tweets)
-
     xs = []
     ys = []
     for t in tweets:
-        print(t['full_text'])
         blob = TextBlob(t['full_text'])
         sents = blob.sentences
         if len(sents) >= 1:
@@ -61,9 +53,6 @@ def get_tweets():
     fig.xaxis.axis_label = 'subjectivity'
     fig.yaxis.axis_label = 'polarity'
     fig.circle(x=xs, y=ys, size=5)
-
-    print(xs)
-    print(ys)
 
     ans = {
         'tweets': tweets,
