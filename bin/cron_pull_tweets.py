@@ -9,6 +9,16 @@ nltk.download('punkt')
 
 
 def run_task(params, ntweets=3, maxpages=2):
+    """
+    Standalone task which searches for tweets using tweepy and stores them
+    in an Elasticsearch instance.
+
+    :param params: Twitter auth and Elasticsearch parameters.
+    :param ntweets: Number of tweets to request.
+    :param maxpages: Max pages to iterate.
+    :return:
+    """
+
     # Setup Twitter access:
     auth = tweepy.OAuthHandler(params['tw_oauth_key'], params['tw_oauth_secret'])
     auth.set_access_token(params['tw_token_key'], params['tw_token_secret'])
