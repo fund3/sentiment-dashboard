@@ -32,14 +32,7 @@
     <div class="row">
         <div class="col-lg-12 text-left">
             <div class="jumbotron">
-                <h1 class="display-4">Bitcoin Sentiments.</h1>
-                <p class="lead">
-                    Placeholder text
-                </p>
-                <hr class="my-4">
-                <p>
-                    Lorem ipsum
-                </p>
+                <h1 class="display-4">Bitcoin Sentiments</h1>
             </div>
 
             <div class="row" data-ng-controller="TweetTableController as tweetTable">
@@ -52,16 +45,17 @@
                 </form>
 
                 <div class="row">
-                    <div class="col-lg-12 text-center">
-                        <div id="output"></div>
+                    <div class="col-lg-6 text-center">
                         <div id="plot_div"></div>
+                    </div>
+
+                    <div class="col-lg-6 text-center">
+                        <div id="plot2_div"></div>
                     </div>
                 </div>
 
                 <div class="row">
-                    <div class="col-lg-12 text-center">
-                        <div id="plot2_div"></div>
-                    </div>
+
                 </div>
 
                 <div class="col-lg-12">
@@ -79,8 +73,8 @@
                             <td>{{ '{{tweet.id_str}}' }}</td>
                             <td>{{ '{{tweet.created_at}}' }}</td>
                             <td>{{ '{{tweet.full_text}}' }}</td>
-                            <td>{{ '{{tweet.subjectivity}}' }}</td>
-                            <td>{{ '{{tweet.polarity}}' }}</td>
+                            <td>{{ '{{tweet.subjectivity.toFixed(2)}}' }}</td>
+                            <td>{{ '{{tweet.polarity.toFixed(2)}}' }}</td>
                         </tr>
                     </table>
                 </div>
@@ -100,7 +94,9 @@
 <script>
 datatable = null;
 $(document).ready(function() {
-  datatable = $('#id_tweet_table').DataTable();
+  datatable = $('#id_tweet_table').DataTable({
+    searching: false
+  });
 });
 </script>
 </body>

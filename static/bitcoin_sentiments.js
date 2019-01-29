@@ -27,7 +27,7 @@ angular.module('BitcoinSentimentsApp', [])
 
       datatable.destroy()
 
-      document.getElementById("output").innerHTML = "";
+//      document.getElementById("output").innerHTML = "";
 
       BitcoinSentimentsService.getTweetsFromServer()
       .then(function(response) {
@@ -41,7 +41,9 @@ angular.module('BitcoinSentimentsApp', [])
         tweetTable.tweets = data['tweets']
         $scope.$apply();
 
-        datatable = $('#id_tweet_table').DataTable();
+        datatable = $('#id_tweet_table').DataTable({
+          searching: false
+        });
 
         console.log('done: ' + JSON.stringify(tweetTable.tweets))
       })
