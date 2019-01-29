@@ -3,6 +3,9 @@ from elasticsearch_dsl import Document, InnerDoc, Integer, Date, Text, Search, F
 
 
 class ESTweet(Document):
+    """
+    elasticsearch-dsl model for storing and retrieving tweets.
+    """
     created_at = Date()
     stored_at = Date()
     full_text = Text(analyzer='snowball')
@@ -25,7 +28,7 @@ def tweet_to_estweet(t, stored_at, sentiment=None):
 
     :param t: tweepy Tweet object
     :param stored_at: datetime object
-    :param sentiment:
+    :param sentiment: TextBlob sentiment object
     :return:
     """
 
@@ -34,6 +37,7 @@ def tweet_to_estweet(t, stored_at, sentiment=None):
     if sentiment:
         subj = sentiment.subjectivity
         pola = sentiment.polarity
+
     ans = ESTweet(created_at=t.created_at,
                   stored_at=stored_at,
                   full_text=t.full_text,
@@ -46,6 +50,12 @@ def tweet_to_estweet(t, stored_at, sentiment=None):
 
 
 def get_tweets(client):
+    """
+    Get tweets from the Elasticsearch endpoint specified by client.
+
+    :param client: Elasticsearch client object.
+    :return: list of tweet represented as dicts.
+    """
     search = Search(index='tweets').using(client).query("match_all")
     results = search.execute()
 
