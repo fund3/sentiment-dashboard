@@ -8,7 +8,10 @@ from elasticsearch import Elasticsearch
 from textblob import TextBlob
 import es_client
 import pandas as pd
+import nltk
 
+
+nltk.download('punkt')
 app = Flask(__name__)
 
 
