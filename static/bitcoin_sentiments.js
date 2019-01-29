@@ -35,15 +35,11 @@ angular.module('BitcoinSentimentsApp', [])
       }).then(function(data) {
         console.log('in callback')
         Bokeh.embed.embed_item(data['plot'])
+        Bokeh.embed.embed_item(data['plot2'])
+
         console.log(data['tweets'])
         tweetTable.tweets = data['tweets']
-//        tweetTable.tweets = [
-//          {'id_str': 1, 'full_text': 'done!'}
-//        ]
         $scope.$apply();
-//        datatable.ajax.reload()
-//        datatable = $('#id_tweet_table').DataTable();
-//        datatable.rows().invalidate('dom')
 
         datatable = $('#id_tweet_table').DataTable();
 

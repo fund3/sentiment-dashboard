@@ -7,6 +7,7 @@ import bokeh.embed
 from elasticsearch import Elasticsearch
 from textblob import TextBlob
 import es_client
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -38,8 +39,14 @@ def get_tweets():
     client = Elasticsearch(hosts=[params['es_endpoint']])
     tweets = es_client.get_tweets(client)
 
-    xs = []
-    ys = []
+
+    import dateutil
+
+    id_strs = []
+    created_ats = []
+    full_texts = []
+    subjs = []
+    polas = []
     for t in tweets:
         blob = TextBlob(t['full_text'])
         sents = blob.sentences
@@ -51,17 +58,38 @@ def get_tweets():
 
         t['subjectivity'] = sentiment.subjectivity
         t['polarity'] = sentiment.polarity
-        xs.append(float(sentiment.subjectivity))
-        ys.append(float(sentiment.polarity))
+        subjs.append(float(sentiment.subjectivity))
+        polas.append(float(sentiment.polarity))
+
+        id_strs.append(t['id_str'])
+        created_ats.append(dateutil.parser.parse(t['created_at']))
+        full_texts.append(t['full_text'])
+
+    df = pd.DataFrame({
+        'id_str': id_strs,
+        'created_at': created_ats,
+        'full_text': full_texts,
+        'subjectivity': subjs,
+        'polarity': polas
+    })
 
     fig = bokeh.plotting.figure(plot_width=600, plot_height=400)
     fig.xaxis.axis_label = 'subjectivity'
     fig.yaxis.axis_label = 'polarity'
-    fig.circle(x=xs, y=ys, size=5)
+    fig.circle(x=subjs, y=polas, size=5)
+
+    # Second plot (average hourly polarity):
+    s_polarity = df[['polarity', 'created_at']].set_index('created_at').resample('H').mean()
+
+    fig2 = bokeh.plotting.figure(plot_width=600, plot_height=400)
+    fig2.xaxis.axis_label = 'hour'
+    fig2.yaxis.axis_label = 'polarity'
+    fig2.line(x=s_polarity.index.values, y=s_polarity['polarity'].values)
 
     ans = {
         'tweets': tweets,
-        'plot': bokeh.embed.json_item(fig, 'plot_div')
+        'plot': bokeh.embed.json_item(fig, 'plot_div'),
+        'plot2': bokeh.embed.json_item(fig2, 'plot2_div')
     }
 
     return json.dumps(ans)
