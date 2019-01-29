@@ -54,7 +54,7 @@ def run_task(params, ntweets=3, maxpages=2):
 
 
 if __name__ == '__main__':
-    if 'PRODUCTION' in os.environ:
+    if 'APP_ENV' in os.environ and os.environ['APP_ENV'] == 'PRODUCTION':
         params = {
             'tw_oauth_key': os.environ['tw_oauth_key'],
             'tw_oauth_secret': os.environ['tw_oauth_secret'],

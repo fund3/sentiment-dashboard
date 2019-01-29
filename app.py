@@ -11,14 +11,8 @@ import es_client
 app = Flask(__name__)
 
 
-@app.route('/')
-def index():
-    return render_template('index.html', resources=bokeh.resources.CDN.render())
-
-
-@app.route('/get_tweets.json', methods=['GET'])
-def get_tweets():
-    if 'PRODUCTION' in os.environ:
+def _get_env_params():
+    if 'APP_ENV' in os.environ and os.environ['APP_ENV'] == 'PRODUCTION':
         params = {
             'tw_oauth_key': os.environ['tw_oauth_key'],
             'tw_oauth_secret': os.environ['tw_oauth_secret'],
@@ -29,6 +23,17 @@ def get_tweets():
     else:
         with open('secrets.txt', 'r') as f:
             params = json.load(f)
+    return params
+
+
+@app.route('/')
+def index():
+    return render_template('index.html', resources=bokeh.resources.CDN.render())
+
+
+@app.route('/get_tweets.json', methods=['GET'])
+def get_tweets():
+    params = _get_env_params()
 
     client = Elasticsearch(hosts=[params['es_endpoint']])
     tweets = es_client.get_tweets(client)
