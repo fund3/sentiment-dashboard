@@ -57,13 +57,13 @@ def get_tweets(client):
     :return: list of tweet represented as dicts.
     """
     search = Search(index='tweets').using(client).query("match_all")
-    results = search.execute()
+    search.execute()
 
     tweets = []
-    for row in results:
-        id_str = _get_with_default(row, 'tid')
+    for row in search.scan():
+        id_str = _get_with_default(row, 'id_str')
         created_at = _get_with_default(row, 'created_at')
-        full_text = _get_with_default(row, 'text')
+        full_text = _get_with_default(row, 'full_text')
         if id_str and created_at and full_text:
             t = {
                 'id_str': id_str,
