@@ -1,14 +1,16 @@
 from flask import Flask, render_template
 import os
 import simplejson as json
+import dateutil
 import bokeh.resources
 import bokeh.plotting
 import bokeh.embed
 from elasticsearch import Elasticsearch
 from textblob import TextBlob
-import es_client
 import pandas as pd
 import nltk
+import es_client
+import plotting
 
 
 nltk.download('punkt')
@@ -42,14 +44,11 @@ def get_tweets():
     client = Elasticsearch(hosts=[params['es_endpoint']])
     tweets = es_client.get_tweets(client)
 
-
-    import dateutil
-
     id_strs = []
     created_ats = []
     full_texts = []
-    subjs = []
-    polas = []
+    subjectivities = []
+    polarities = []
     for t in tweets:
         blob = TextBlob(t['full_text'])
         sents = blob.sentences
@@ -61,8 +60,8 @@ def get_tweets():
 
         t['subjectivity'] = sentiment.subjectivity
         t['polarity'] = sentiment.polarity
-        subjs.append(float(sentiment.subjectivity))
-        polas.append(float(sentiment.polarity))
+        subjectivities.append(float(sentiment.subjectivity))
+        polarities.append(float(sentiment.polarity))
 
         id_strs.append(t['id_str'])
         created_ats.append(dateutil.parser.parse(t['created_at']))
@@ -72,27 +71,21 @@ def get_tweets():
         'id_str': id_strs,
         'created_at': created_ats,
         'full_text': full_texts,
-        'subjectivity': subjs,
-        'polarity': polas
+        'subjectivity': subjectivities,
+        'polarity': polarities
     })
 
-    fig = bokeh.plotting.figure(plot_width=600, plot_height=400)
-    fig.xaxis.axis_label = 'subjectivity'
-    fig.yaxis.axis_label = 'polarity'
-    fig.circle(x=subjs, y=polas, size=5)
+    # First plot:
+    polarity_subjectivity_scatter_plot = plotting.plot_polarity_vs_subjectivity(df)
 
-    # Second plot (average hourly polarity):
+    # Second plot:
     s_polarity = df[['polarity', 'created_at']].set_index('created_at').resample('H').mean()
-
-    fig2 = bokeh.plotting.figure(plot_width=600, plot_height=400)
-    fig2.xaxis.axis_label = 'hour'
-    fig2.yaxis.axis_label = 'polarity'
-    fig2.line(x=s_polarity.index.values, y=s_polarity['polarity'].values)
+    polarity_plot = plotting.plot_polarity_vs_time(s_polarity)
 
     ans = {
         'tweets': tweets,
-        'plot': bokeh.embed.json_item(fig, 'plot_div'),
-        'plot2': bokeh.embed.json_item(fig2, 'plot2_div')
+        'plot': bokeh.embed.json_item(polarity_subjectivity_scatter_plot, 'plot_div'),
+        'plot2': bokeh.embed.json_item(polarity_plot, 'plot2_div')
     }
 
     return json.dumps(ans)
