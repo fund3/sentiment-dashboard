@@ -67,4 +67,8 @@ if __name__ == '__main__':
         with open('secrets.txt', 'r') as f:
             params = json.load(f)
 
-    run_task(params)
+    ntweets = 100
+    if 'P_CRON_NTWEETS' in os.environ:
+        ntweets = os.environ['P_CRON_NTWEETS']
+
+    run_task(params, ntweets=ntweets)
