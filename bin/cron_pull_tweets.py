@@ -54,21 +54,20 @@ def run_task(params, ntweets=3, maxpages=2):
 
 
 if __name__ == '__main__':
-    if 'APP_ENV' in os.environ and os.environ['APP_ENV'] == 'PRODUCTION':
+    app_env = os.environ.get('APP_ENV', default='DEVELOPMENT')
+
+    if app_env == 'PRODUCTION':
         params = {
             'tw_oauth_key': os.environ['tw_oauth_key'],
             'tw_oauth_secret': os.environ['tw_oauth_secret'],
             'tw_token_key': os.environ['tw_token_key'],
             'tw_token_secret': os.environ['tw_token_secret'],
-            'es_endpoint': os.environ['es_endpoint']
+            'es_endpoint': os.environ['es_endpoint'],
+            'param_ntweets': os.environ.get('P_CRON_NTWEETS', default=100)
         }
     else:
         import simplejson as json
         with open('secrets.txt', 'r') as f:
             params = json.load(f)
 
-    ntweets = 100
-    if 'P_CRON_NTWEETS' in os.environ:
-        ntweets = os.environ['P_CRON_NTWEETS']
-
-    run_task(params, ntweets=ntweets)
+    run_task(params, ntweets=params['param_ntweets'])
