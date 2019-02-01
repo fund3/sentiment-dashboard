@@ -1,10 +1,14 @@
 import os
 from datetime import datetime
+
+import nltk
 import tweepy
 from elasticsearch_dsl import connections
 from textblob import TextBlob
+
 import es_client
-import nltk
+
+
 nltk.download('punkt')
 
 

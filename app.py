@@ -1,14 +1,16 @@
-from flask import Flask, render_template
 import os
-import simplejson as json
+
 import dateutil
-import bokeh.resources
-import bokeh.plotting
 import bokeh.embed
+import bokeh.plotting
+import bokeh.resources
+import nltk
+import pandas as pd
+import simplejson as json
+from flask import Flask, render_template
 from elasticsearch import Elasticsearch
 from textblob import TextBlob
-import pandas as pd
-import nltk
+
 import es_client
 import plotting
 

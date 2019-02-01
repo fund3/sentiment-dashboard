@@ -1,5 +1,4 @@
-# from datetime import datetime
-from elasticsearch_dsl import Document, InnerDoc, Integer, Date, Text, Search, Float
+from elasticsearch_dsl import Document, Integer, Date, Text, Search, Float
 
 
 class ESTweet(Document):
