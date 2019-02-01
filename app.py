@@ -18,7 +18,8 @@ app = Flask(__name__)
 
 
 def _get_env_params():
-    if 'APP_ENV' in os.environ and os.environ['APP_ENV'] == 'PRODUCTION':
+    app_env = os.environ.get('APP_ENV', default='DEVELOPMENT')
+    if app_env == 'PRODUCTION':
         params = {
             'tw_oauth_key': os.environ['tw_oauth_key'],
             'tw_oauth_secret': os.environ['tw_oauth_secret'],
