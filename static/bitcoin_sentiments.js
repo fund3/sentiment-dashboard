@@ -23,29 +23,15 @@ angular.module('BitcoinSentimentsApp', [])
         {'id_str': 1, 'full_text': 'working!'}
       ]
 
-      console.log('datatable: ' + datatable)
-
-      datatable.destroy()
-
-//      document.getElementById("output").innerHTML = "";
-
       BitcoinSentimentsService.getTweetsFromServer()
       .then(function(response) {
-        return response.json();
+        return response.json()
       }).then(function(data) {
-        console.log('in callback')
-        Bokeh.embed.embed_item(data['plot'])
-        Bokeh.embed.embed_item(data['plot2'])
-
-        console.log(data['tweets'])
+        console.log('getTweetsFromServer')
+        Bokeh.embed.embed_item(data['plot2'], 'mainplot_div')
         tweetTable.tweets = data['tweets']
         $scope.$apply();
-
-        datatable = $('#id_tweet_table').DataTable({
-          searching: false
-        });
-
-        console.log('done: ' + JSON.stringify(tweetTable.tweets))
+        console.log('getTweetsFromServer finished.')
       })
     };
 
