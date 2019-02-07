@@ -36,9 +36,10 @@ angular.module('BitcoinSentimentsApp', [])
                 $('#plot_card_spinner').css('display', 'none')
                 Bokeh.embed.embed_item(data['plot2'], 'mainplot_div')
                 tweetTable.tweets = data['tweets']
-                $('#card_li_plot a').removeClass('bs_timeline_empty')
                 $scope.$apply();
             })
+
+            $('#card_li_plot a').removeClass('bs_timeline_empty')
         } else {
             $('#card_li_intro a').removeClass('active')
             $('#card_li_plot a').addClass('active')
