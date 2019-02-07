@@ -55,23 +55,23 @@ def get_tweets(client, max_tweets=5000):
     :param client: Elasticsearch client object.
     :return: list of tweet represented as dicts.
     """
-    search = Search(index='tweets').using(client).query('match_all').sort('created_at')
+    search = Search(index='tweets')\
+        .using(client)\
+        .query('match_all')\
+        .sort({'created_at': {'order': 'desc'}})[:max_tweets]
     search.execute()
 
     tweets = []
-    for row in search.scan():
-        if len(tweets) <= max_tweets:
-            created_at = _get_with_default(row, 'created_at')
-            full_text = _get_with_default(row, 'full_text')
+    for hit in search:
+        if len(tweets) < max_tweets:
+            created_at = _get_with_default(hit, 'created_at', default=None)
+            full_text = _get_with_default(hit, 'full_text', default=None)
             if created_at and full_text:
                 t = {
-                    'id_str': row.meta.id,
+                    'id_str': hit.meta.id,
                     'created_at': created_at,
                     'full_text': full_text
                 }
                 tweets.append(t)
-
-    if len(tweets) > max_tweets:
-        tweets = tweets[:max_tweets]
 
     return tweets
