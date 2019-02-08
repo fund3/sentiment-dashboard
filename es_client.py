@@ -53,7 +53,7 @@ def get_tweets(client, max_tweets=5000):
     Get tweets from the Elasticsearch endpoint specified by client.
 
     :param client: Elasticsearch client object.
-    :return: list of tweet represented as dicts.
+    :return: list of tweets represented as dicts.
     """
     search = Search(index='tweets')\
         .using(client)\
