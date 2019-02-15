@@ -31,17 +31,17 @@ def tweet_to_estweet(t, stored_at, sentiment=None):
     :return:
     """
 
-    subj = 'NaN'
-    pola = 'NaN'
+    subjectivity = 'NaN'
+    polarity = 'NaN'
     if sentiment:
-        subj = sentiment.subjectivity
-        pola = sentiment.polarity
+        subjectivity = sentiment.subjectivity
+        polarity = sentiment.polarity
 
     ans = ESTweet(created_at=t.created_at,
                   stored_at=stored_at,
                   full_text=t.full_text,
-                  subjectivity=subj,
-                  polarity=pola,
+                  subjectivity=subjectivity,
+                  polarity=polarity,
                   author_id=t.user.id,
                   author_followers=t.user.followers_count)
     ans.meta.id = t.id
