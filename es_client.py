@@ -48,7 +48,7 @@ def tweet_to_estweet(t, stored_at, sentiment=None):
     return ans
 
 
-def get_tweets(client, max_tweets=5000):
+def get_tweets(client, max_tweets=500):
     """
     Get tweets from the Elasticsearch endpoint specified by client.
 

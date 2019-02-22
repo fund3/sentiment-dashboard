@@ -14,8 +14,8 @@ def plot_polarity_vs_time(df, polarity_column='polarity'):
     p = bokeh.plotting.figure(
         plot_width=800, plot_height=450,
         sizing_mode='scale_width',
-        tools="",
-        x_axis_label='time', y_axis_label='polarity',
+        tools='xpan,xwheel_zoom',
+        x_axis_label='Time (UTC)', y_axis_label='Mean Hourly Sentiment',
         x_axis_type='datetime'
     )
 
@@ -29,25 +29,28 @@ def plot_polarity_vs_time(df, polarity_column='polarity'):
     p.xgrid[0].grid_line_color = None
     p.ygrid[0].grid_line_alpha = 0.5
 
+    # Format the time axis:
+    p.xaxis.formatter = bokeh.models.DatetimeTickFormatter(hours=['%m/%d %H:%M'])
+
     # Format view range:
     p.y_range = bokeh.models.Range1d(-1.0, 1.0)
 
     # p.sizing_mode = "stretch_both"
 
     # Prepare data:
-    cd_source = bokeh.models.ColumnDataSource({'timestamp': df.index, 'polarity': df[polarity_column]})
+    cd_source = bokeh.models.ColumnDataSource({'timestamp': df.index, 'sentiment': df[polarity_column]})
 
     # Prepare plotting series:
-    p.line('timestamp', 'polarity', source=cd_source, line_width=2)
-    p.circle('timestamp', 'polarity', source=cd_source, fill_color="white", size=2)
+    p.line('timestamp', 'sentiment', source=cd_source, line_width=2)
+    p.circle('timestamp', 'sentiment', source=cd_source, fill_color="white", size=2)
 
     # Prepare hover tooltips:
     p.add_tools(bokeh.models.HoverTool(
         tooltips=[
             ('time', '@timestamp{%F %H:%M}'),
-            ("polarity", "@polarity{+0.00}")
+            ("sentiment", "@sentiment{+0.00}")
         ],
-        formatters={'timestamp': 'datetime', 'polarity': 'numeral'},
+        formatters={'timestamp': 'datetime', 'sentiment': 'numeral'},
         mode='vline'
     ))
 
