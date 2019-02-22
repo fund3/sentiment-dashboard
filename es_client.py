@@ -7,11 +7,12 @@ class ESTweet(Document):
     """
     created_at = Date()
     stored_at = Date()
+    version = Text()
     full_text = Text(analyzer='snowball')
-    subjectivity = Float()
-    polarity = Float()
     author_id = Integer()
     author_followers = Integer()
+    retweet_count = Integer()
+
 
     class Index:
         name = 'tweets'
@@ -21,29 +22,23 @@ def _get_with_default(obj, key, default=None):
     return obj[key] if key in obj else default
 
 
-def tweet_to_estweet(t, stored_at, sentiment=None):
+def tweet_to_estweet(t, stored_at, version):
     """
     Converts a tweepy Tweet object to an ESTweet.
 
     :param t: tweepy Tweet object
     :param stored_at: datetime object
-    :param sentiment: TextBlob sentiment object
+    :param version: version information to distinguish tweets
     :return:
     """
 
-    subjectivity = 'NaN'
-    polarity = 'NaN'
-    if sentiment:
-        subjectivity = sentiment.subjectivity
-        polarity = sentiment.polarity
-
     ans = ESTweet(created_at=t.created_at,
                   stored_at=stored_at,
+                  version=version,
                   full_text=t.full_text,
-                  subjectivity=subjectivity,
-                  polarity=polarity,
                   author_id=t.user.id,
-                  author_followers=t.user.followers_count)
+                  author_followers=t.user.followers_count,
+                  retweet_count=t.retweet_count)
     ans.meta.id = t.id
     return ans
 

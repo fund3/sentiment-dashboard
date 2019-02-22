@@ -11,6 +11,9 @@ import es_client
 
 nltk.download('punkt')
 
+# Version information to track elasticsearch tweets
+ES_TWEET_VERSION = '20190222'
+
 
 def run_task(params, ntweets=3, maxpages=2):
     """
@@ -36,23 +39,14 @@ def run_task(params, ntweets=3, maxpages=2):
 
     for page in cursor.pages(maxpages):
         for result in page:
-            print(result)
-            blob = TextBlob(result.full_text)
-            sents = blob.sentences
-            sentiment = None
-            if len(sents) >= 1:
-                sent = sents[0]
-                sentiment = sent.sentiment
-
             tid = result.id
             es_tweet = es_client.ESTweet.get(tid, ignore=404)
             if not es_tweet:
-                print('new tweet')
-                t = es_client.tweet_to_estweet(result, stored_at=stored_at, sentiment=sentiment)
+                t = es_client.tweet_to_estweet(result,
+                                               stored_at=stored_at,
+                                               version=ES_TWEET_VERSION)
                 t.save(index='tweets')  # TODO: explicitly giving the index shouldn't be necessary
-                print(t)
             else:
-                print('old tweet')
                 print(es_tweet)
     print('done')
 
