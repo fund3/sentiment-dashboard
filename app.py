@@ -13,6 +13,7 @@ from textblob import TextBlob
 
 import es_client
 import plotting
+from sentiments import calc_sentiments
 
 
 nltk.download('punkt')
@@ -78,17 +79,20 @@ def get_tweets():
         'polarity': polarities
     })
 
-    # First plot:
-    polarity_subjectivity_scatter_plot = plotting.plot_polarity_vs_subjectivity(df)
-
-    # Second plot:
+    # Polarity plot using textblob:
     s_polarity = df[['polarity', 'created_at']].set_index('created_at').resample('H').mean()
     polarity_plot = plotting.plot_polarity_vs_time(s_polarity)
 
+    # Polarity plot using inhouse estimator:
+    ih_sentiments = calc_sentiments(df, tweet_column='full_text')
+    df['ih_sentiments'] = ih_sentiments
+    s_ih_sentiments = df[['ih_sentiments', 'created_at']].set_index('created_at').resample('H').mean()
+    ih_sentiments_plot = plotting.plot_polarity_vs_time(s_ih_sentiments, polarity_column='ih_sentiments')
+
     ans = {
         'tweets': tweets,
-        'plot': bokeh.embed.json_item(polarity_subjectivity_scatter_plot, 'plot_div'),
-        'plot2': bokeh.embed.json_item(polarity_plot, 'plot2_div')
+        'plot2': bokeh.embed.json_item(polarity_plot),
+        'ih_sentiments_plot': bokeh.embed.json_item(ih_sentiments_plot)
     }
 
     return json.dumps(ans)

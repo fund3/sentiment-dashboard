@@ -1,7 +1,8 @@
 import bokeh.plotting
+import bokeh.models
 
 
-def plot_polarity_vs_time(df):
+def plot_polarity_vs_time(df, polarity_column='polarity'):
     """
     Prepare a Bokeh timeseries plot: tweet polarity versus time (hours).
     Expects df to have a datetime index and a polarity column.
@@ -10,26 +11,47 @@ def plot_polarity_vs_time(df):
     :return: Bokeh figure
     """
 
-    fig = bokeh.plotting.figure(plot_width=600, plot_height=400)
-    fig.xaxis.axis_label = 'hour'
-    fig.yaxis.axis_label = 'polarity'
-    fig.line(x=df.index.values, y=df['polarity'].values)
+    p = bokeh.plotting.figure(
+        plot_width=800, plot_height=450,
+        sizing_mode='scale_width',
+        tools='xpan,xwheel_zoom',
+        x_axis_label='Time (UTC)', y_axis_label='Mean Hourly Sentiment',
+        x_axis_type='datetime'
+    )
 
-    return fig
+    # Format background colors:
+    low_box = bokeh.models.BoxAnnotation(top=0, fill_alpha=0.1, fill_color='red')
+    high_box = bokeh.models.BoxAnnotation(bottom=0, fill_alpha=0.1, fill_color='green')
+    p.add_layout(low_box)
+    p.add_layout(high_box)
 
+    # Format gridlines:
+    p.xgrid[0].grid_line_color = None
+    p.ygrid[0].grid_line_alpha = 0.5
 
-def plot_polarity_vs_subjectivity(df):
-    """
-    Prepare a Bokeh scatter plot: tweet polarity versus subjectivity.
-    Expects df to have polarity and subjectivity columns.
+    # Format the time axis:
+    p.xaxis.formatter = bokeh.models.DatetimeTickFormatter(hours=['%m/%d %H:%M'])
 
-    :param df: Source dataframe
-    :return: Bokeh figure
-    """
+    # Format view range:
+    p.y_range = bokeh.models.Range1d(-1.0, 1.0)
 
-    fig = bokeh.plotting.figure(plot_width=600, plot_height=400)
-    fig.xaxis.axis_label = 'subjectivity'
-    fig.yaxis.axis_label = 'polarity'
-    fig.circle(x=df['subjectivity'].values, y=df['polarity'].values, size=5)
+    # p.sizing_mode = "stretch_both"
 
-    return fig
+    # Prepare data:
+    cd_source = bokeh.models.ColumnDataSource({'timestamp': df.index, 'sentiment': df[polarity_column]})
+
+    # Prepare plotting series:
+    p.line('timestamp', 'sentiment', source=cd_source, line_width=2)
+    p.circle('timestamp', 'sentiment', source=cd_source, fill_color="white", size=2)
+
+    # Prepare hover tooltips:
+    p.add_tools(bokeh.models.HoverTool(
+        tooltips=[
+            ('time', '@timestamp{%F %H:%M}'),
+            ("sentiment", "@sentiment{+0.00}")
+        ],
+        formatters={'timestamp': 'datetime', 'sentiment': 'numeral'},
+        mode='vline'
+    ))
+
+    return p
