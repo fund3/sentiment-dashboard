@@ -8,6 +8,12 @@ angular.module('BitcoinSentimentsApp', [])
       return promise;
   }
 
+  Service.getMeanSentsFromServer = function() {
+      url = '/get_mean_sentiments.json'
+      var promise = fetch(url)
+      return promise;
+  }
+
   return Service;
 }])
 .controller('TweetTableController', function($scope, BitcoinSentimentsService) {
@@ -25,6 +31,15 @@ angular.module('BitcoinSentimentsApp', [])
             tweetTable.tweets = [
                 {'id_str': 1, 'full_text': 'working!'}
             ]
+
+            // Get sentiment ticks quicker:
+            BitcoinSentimentsService.getMeanSentsFromServer()
+            .then(function(response) {
+                return response.json()
+            }).then(function(data) {
+                Bokeh.embed.embed_item(data['mean_sentiments_plot'], 'mean_sentiments_plot_div')
+                $scope.$apply();
+            })
 
             BitcoinSentimentsService.getTweetsFromServer()
             .then(function(response) {

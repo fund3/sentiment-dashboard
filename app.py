@@ -98,5 +98,28 @@ def get_tweets():
     return json.dumps(ans)
 
 
+@app.route('/get_mean_sentiments.json', methods=['GET'])
+def get_mean_sentiments():
+    params = _get_env_params()
+
+    client = Elasticsearch(hosts=[params['es_endpoint']])
+    ticks = es_client.get_mean_hourly_sentiment_ticks(client)
+
+    # Convert to DataFrame:
+    df = pd.DataFrame.from_records(ticks)
+    df.index = pd.to_datetime(df['timestamp'])
+    df = df.drop(columns='timestamp')
+    df = df.dropna()
+
+    # Sentiment plot:
+    mean_sentiments_plot = plotting.plot_polarity_vs_time(df, polarity_column='value')
+
+    ans = {
+        'mean_sentiments_plot': bokeh.embed.json_item(mean_sentiments_plot)
+    }
+
+    return json.dumps(ans)
+
+
 if __name__ == '__main__':
     app.run(port=33507)
