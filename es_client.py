@@ -13,7 +13,6 @@ class ESTweet(Document):
     author_followers = Integer()
     retweet_count = Integer()
 
-
     class Index:
         name = 'tweets'
 
@@ -70,3 +69,32 @@ def get_tweets(client, max_tweets=500):
                 tweets.append(t)
 
     return tweets
+
+
+def get_mean_hourly_sentiment_ticks(client, max_ticks=1000):
+    """
+    Get mean hourly sentiment ticks from the Elasticsearch endpoint specified by client.
+
+    :param client: Elasticsearch client object.
+    :return: list of ticks represented as dicts.
+    """
+
+    # TODO: match a specific version
+    search = Search(index='mean_sentiment_ticks')\
+        .using(client)\
+        .query('match_all')\
+        .sort({'timestamp': {'order': 'desc'}})[:max_ticks]
+    search.execute()
+
+    ticks = []
+    for hit in search:
+        hit_dict = hit.to_dict()
+        timestamp = hit_dict.get('timestamp', None)
+        value = hit_dict.get('value', None)
+        tick = {
+            'timestamp': timestamp,
+            'value': value
+        }
+        ticks.append(tick)
+
+    return ticks
