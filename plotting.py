@@ -1,3 +1,5 @@
+import datetime
+
 import bokeh.plotting
 import bokeh.models
 
@@ -33,6 +35,8 @@ def plot_polarity_vs_time(df, polarity_column='polarity'):
     p.xaxis.formatter = bokeh.models.DatetimeTickFormatter(hours=['%m/%d %H:%M'])
 
     # Format view range:
+    now = datetime.datetime.now()
+    p.x_range = bokeh.models.Range1d(now - datetime.timedelta(days=3), now + datetime.timedelta(hours=6))
     p.y_range = bokeh.models.Range1d(-1.0, 1.0)
 
     # p.sizing_mode = "stretch_both"
