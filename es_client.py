@@ -49,6 +49,7 @@ def get_tweets(client, max_tweets=500):
     :param client: Elasticsearch client object.
     :return: list of tweets represented as dicts.
     """
+
     search = Search(index='tweets')\
         .using(client)\
         .query('match_all')\

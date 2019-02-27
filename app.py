@@ -13,7 +13,7 @@ from textblob import TextBlob
 
 import es_client
 import plotting
-from sentiments import calc_sentiments
+import sentiments
 
 
 nltk.download('punkt')
@@ -48,53 +48,17 @@ def get_tweets():
     client = Elasticsearch(hosts=[params['es_endpoint']])
     tweets = es_client.get_tweets(client)
 
-    id_strs = []
-    created_ats = []
-    full_texts = []
-    subjectivities = []
-    polarities = []
-    for t in tweets:
-        blob = TextBlob(t['full_text'])
-        sents = blob.sentences
-        if len(sents) >= 1:
-            sent = sents[0]
-            sentiment = sent.sentiment
-        else:
-            sentiment = None
-
-        t['subjectivity'] = sentiment.subjectivity
-        t['polarity'] = sentiment.polarity
-        subjectivities.append(float(sentiment.subjectivity))
-        polarities.append(float(sentiment.polarity))
-
-        id_strs.append(t['id_str'])
-        created_ats.append(dateutil.parser.parse(t['created_at']))
-        full_texts.append(t['full_text'])
-
-    df = pd.DataFrame({
-        'id_str': id_strs,
-        'created_at': created_ats,
-        'full_text': full_texts,
-        'subjectivity': subjectivities,
-        'polarity': polarities
-    })
-
-    # Polarity plot using textblob:
-    s_polarity = df[['polarity', 'created_at']].set_index('created_at').resample('H').mean()
-    polarity_plot = plotting.plot_polarity_vs_time(s_polarity)
+    # Convert to DataFrame:
+    df_tweets = pd.DataFrame.from_records(tweets)
 
     # Polarity plot using inhouse estimator:
-    ih_sentiments = calc_sentiments(df, tweet_column='full_text')
-    df['ih_sentiments'] = ih_sentiments
-    s_ih_sentiments = df[['ih_sentiments', 'created_at']].set_index('created_at').resample('H').mean()
-    ih_sentiments_plot = plotting.plot_polarity_vs_time(s_ih_sentiments, polarity_column='ih_sentiments')
+    ih_sentiments = sentiments.calc_sentiments(df_tweets, tweet_column='full_text')
 
-    ans = {
-        'tweets': tweets,
-        'plot2': bokeh.embed.json_item(polarity_plot),
-        'ih_sentiments_plot': bokeh.embed.json_item(ih_sentiments_plot)
-    }
+    # Add in-house sentiment to tweet_dicts:
+    for tweet_dict, ih_sent in zip(tweets, ih_sentiments):
+        tweet_dict['ih_sentiment'] = int(ih_sent)
 
+    ans = {'tweets': tweets}
     return json.dumps(ans)
 
 
