@@ -69,9 +69,14 @@
                 </thead>
                 <tbody>
                     <tr class="small" data-ng-repeat="tweet in tweetTable.tweets">
-                        <td><span class="badge badge-pill"
-                                  data-ng-class="{'true':'badge-success', 'false':'badge-danger'}[tweet.ih_sentiment > 0.5]">{{ '{{tweet.ih_sentiment.toFixed(1)}}' }}</span></td>
-                        <td>{{ '{{tweet.full_text}}' }}</td>
+                        <td>
+                            <span class="badge badge-pill" data-ng-class="{'true':'badge-success', 'false':'badge-danger'}[tweet.ih_sentiment > 0.5]">{{ '{{tweet.ih_sentiment.toFixed(1)}}' }}</span><br />
+                        </td>
+                        <td>
+                            {{ '{{tweet.full_text}}' }}<br />
+                            <span class="badge badge-pill">{{ '{{tweet.author_followers}}' }} <abbr title="author followers">fol</abbr></span>
+                            <span class="badge badge-pill">{{ '{{tweet.retweet_count}}' }} <abbr title="retweet count">rts</abbr></span>
+                        </td>
                     </tr>
                 </tbody>
             </table>

@@ -59,6 +59,7 @@ def get_tweets(client, max_tweets=500):
     tweets = []
     for hit in search:
         if len(tweets) < max_tweets:
+            version = _get_with_default(hit, 'version', default=None)
             created_at = _get_with_default(hit, 'created_at', default=None)
             full_text = _get_with_default(hit, 'full_text', default=None)
             if created_at and full_text:
@@ -67,6 +68,12 @@ def get_tweets(client, max_tweets=500):
                     'created_at': created_at,
                     'full_text': full_text
                 }
+
+                if version and version >= '20190222':
+                    t['version'] = version
+                    t['author_followers'] = _get_with_default(hit, 'author_followers', default=None)
+                    t['retweet_count'] = _get_with_default(hit, 'retweet_count', default=None)
+
                 tweets.append(t)
 
     return tweets
