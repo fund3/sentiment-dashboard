@@ -1,22 +1,18 @@
 import os
 
-import dateutil
 import bokeh.embed
 import bokeh.plotting
 import bokeh.resources
-import nltk
 import pandas as pd
 import simplejson as json
 from flask import Flask, render_template
 from elasticsearch import Elasticsearch
-from textblob import TextBlob
 
 import es_client
 import plotting
 import sentiments
 
 
-nltk.download('punkt')
 app = Flask(__name__)
 
 

@@ -1,15 +1,11 @@
 import os
 from datetime import datetime
 
-import nltk
 import tweepy
 from elasticsearch_dsl import connections
-from textblob import TextBlob
 
 import es_client
 
-
-nltk.download('punkt')
 
 # Version information to track elasticsearch tweets
 ES_TWEET_VERSION = '20190222'
