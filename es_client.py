@@ -84,6 +84,7 @@ def get_mean_hourly_sentiment_ticks(client, max_ticks=1000):
     Get mean hourly sentiment ticks from the Elasticsearch endpoint specified by client.
 
     :param client: Elasticsearch client object.
+    :param max_ticks: Max length of the hourly ticks series to be retrieved.
     :return: list of ticks represented as dicts.
     """
 
@@ -94,15 +95,9 @@ def get_mean_hourly_sentiment_ticks(client, max_ticks=1000):
         .sort({'timestamp': {'order': 'desc'}})[:max_ticks]
     search.execute()
 
-    ticks = []
-    for hit in search:
-        hit_dict = hit.to_dict()
-        timestamp = hit_dict.get('timestamp', None)
-        value = hit_dict.get('value', None)
-        tick = {
-            'timestamp': timestamp,
-            'value': value
-        }
-        ticks.append(tick)
-
-    return ticks
+    return [
+        {
+            'timestamp': hit.to_dict().get('timestamp', None),
+            'value': hit.to_dict().get('value', None)
+        } for hit in search
+    ]

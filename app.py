@@ -60,6 +60,10 @@ def get_tweets():
 
 @app.route('/get_mean_sentiments.json', methods=['GET'])
 def get_mean_sentiments():
+    """
+    Via a GET request, returns a JSON object containing a time series of mean hourly sentiment ticks.
+    """
+
     params = _get_env_params()
 
     client = Elasticsearch(hosts=[params['es_endpoint']])

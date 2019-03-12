@@ -32,7 +32,7 @@ angular.module('BitcoinSentimentsApp', [])
                 {'id_str': 1, 'full_text': 'working!'}
             ]
 
-            // Get sentiment ticks quicker:
+            // Get precomputed sentiment ticks:
             BitcoinSentimentsService.getMeanSentsFromServer()
             .then(function(response) {
                 return response.json()
