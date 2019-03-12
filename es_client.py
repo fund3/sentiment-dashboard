@@ -13,7 +13,6 @@ class ESTweet(Document):
     author_followers = Integer()
     retweet_count = Integer()
 
-
     class Index:
         name = 'tweets'
 
@@ -50,6 +49,7 @@ def get_tweets(client, max_tweets=500):
     :param client: Elasticsearch client object.
     :return: list of tweets represented as dicts.
     """
+
     search = Search(index='tweets')\
         .using(client)\
         .query('match_all')\
@@ -59,6 +59,7 @@ def get_tweets(client, max_tweets=500):
     tweets = []
     for hit in search:
         if len(tweets) < max_tweets:
+            version = _get_with_default(hit, 'version', default=None)
             created_at = _get_with_default(hit, 'created_at', default=None)
             full_text = _get_with_default(hit, 'full_text', default=None)
             if created_at and full_text:
@@ -67,6 +68,36 @@ def get_tweets(client, max_tweets=500):
                     'created_at': created_at,
                     'full_text': full_text
                 }
+
+                if version and version >= '20190222':
+                    t['version'] = version
+                    t['author_followers'] = _get_with_default(hit, 'author_followers', default=None)
+                    t['retweet_count'] = _get_with_default(hit, 'retweet_count', default=None)
+
                 tweets.append(t)
 
     return tweets
+
+
+def get_mean_hourly_sentiment_ticks(client, max_ticks=1000):
+    """
+    Get mean hourly sentiment ticks from the Elasticsearch endpoint specified by client.
+
+    :param client: Elasticsearch client object.
+    :param max_ticks: Max length of the hourly ticks series to be retrieved.
+    :return: list of ticks represented as dicts.
+    """
+
+    # TODO: match a specific version
+    search = Search(index='mean_sentiment_ticks')\
+        .using(client)\
+        .query('match_all')\
+        .sort({'timestamp': {'order': 'desc'}})[:max_ticks]
+    search.execute()
+
+    return [
+        {
+            'timestamp': hit.to_dict().get('timestamp', None),
+            'value': hit.to_dict().get('value', None)
+        } for hit in search
+    ]
