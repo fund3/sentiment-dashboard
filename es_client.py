@@ -67,7 +67,6 @@ def tweepy_to_dict(tweet, *, stored_at=None, version=None):
 
     ans = {
         'created_at': tweet.created_at,
-        'stored_at': tweet.stored_at,
         'full_text': tweet.full_text,
         'author_id': tweet.user.id,
         'author_followers': tweet.user.followers_count,
