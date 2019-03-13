@@ -17,8 +17,26 @@ class ESTweet(Document):
         name = 'tweets'
 
 
+class MeanSentimentTick(Document):
+    value = Float()
+    timestamp = Date(default_timezone='UTC')
+    version = Text()
+
+    class Index:
+        name = 'mean_sentiment_ticks'
+
+
 def _get_with_default(obj, key, default=None):
     return obj[key] if key in obj else default
+
+
+def make_mean_sentiment_tick(value, timestamp, version):
+    ans = MeanSentimentTick(
+        value=value,
+        timestamp=timestamp,
+        version=version
+    )
+    return ans
 
 
 def tweet_to_estweet(t, stored_at, version):
@@ -39,6 +57,30 @@ def tweet_to_estweet(t, stored_at, version):
                   author_followers=t.user.followers_count,
                   retweet_count=t.retweet_count)
     ans.meta.id = t.id
+    return ans
+
+
+def tweepy_to_dict(tweet, *, stored_at=None, version=None):
+    """
+    Converts a tweepy Tweet object to a dict.
+    """
+
+    ans = {
+        'created_at': tweet.created_at,
+        'stored_at': tweet.stored_at,
+        'full_text': tweet.full_text,
+        'author_id': tweet.user.id,
+        'author_followers': tweet.user.followers_count,
+        'retweet_count': tweet.retweet_count,
+        'id_str': tweet.id,
+    }
+
+    if stored_at:
+        ans['stored_at'] = stored_at
+
+    if version:
+        ans['version'] = version
+
     return ans
 
 
