@@ -39,23 +39,22 @@ def index():
 
 @app.route('/get_tweets.json', methods=['GET'])
 def get_tweets():
+    """
+    Via a GET request, returns a JSON object containing a sample of recent tweets.
+    """
+
+    # TODO: client object should be cached between requests.
     params = _get_env_params()
-
     client = Elasticsearch(hosts=[params['es_endpoint']])
+
+    # Get tweets and process:
     tweets = es_client.get_tweets(client)
-
-    # Convert to DataFrame:
     df_tweets = pd.DataFrame.from_records(tweets)
+    df_tweets = df_tweets[df_tweets['full_text'].apply(sentiments.tweet_nonhashtag_ratio) >= 0.8]
+    df_tweets['ih_sentiment'] = sentiments.calc_sentiments(df_tweets, tweet_column='full_text')
 
-    # Polarity plot using inhouse estimator:
-    ih_sentiments = sentiments.calc_sentiments(df_tweets, tweet_column='full_text')
-
-    # Add in-house sentiment to tweet_dicts:
-    for tweet_dict, ih_sent in zip(tweets, ih_sentiments):
-        tweet_dict['ih_sentiment'] = int(ih_sent)
-
-    ans = {'tweets': tweets}
-    return json.dumps(ans)
+    tweets_json = json.loads(df_tweets.to_json(orient='records'))
+    return json.dumps({'tweets': tweets_json})
 
 
 @app.route('/get_mean_sentiments.json', methods=['GET'])

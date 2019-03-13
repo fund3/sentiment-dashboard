@@ -1,3 +1,5 @@
+import re
+
 import dill
 import nltk
 from sklearn import base
@@ -26,6 +28,13 @@ class TwitterPreprocessor(base.BaseEstimator, base.TransformerMixin):
                                 if len(token) > 1
                                 and not token.startswith('http')])
         return clean_tweet
+
+
+def tweet_nonhashtag_ratio(tweet):
+    """
+    Calculates the percentage of the tweet left over after removing hastags.
+    """
+    return len(re.sub(r'#\w+', '', tweet)) / len(tweet)
 
 
 def calc_sentiments(df_tweets, tweet_column='full_text'):

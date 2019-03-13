@@ -48,6 +48,7 @@ angular.module('BitcoinSentimentsApp', [])
             }).then(function(data) {
 //                $('#plot_card_spinner').css('display', 'none')
 //                Bokeh.embed.embed_item(data['ih_sentiments_plot'], 'mainplot_div')
+                console.log(data)
                 tweetTable.tweets = data['tweets']
                 $scope.$apply();
             })
