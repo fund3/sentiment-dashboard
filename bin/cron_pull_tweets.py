@@ -1,13 +1,13 @@
 import os
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 import tweepy
 from elasticsearch_dsl import connections
 
 import es_client
 import sentiments
-
 
 # Version information to track elasticsearch tweets
 ES_TWEET_VERSION = '20190222'
@@ -53,7 +53,18 @@ def run_task(params, ntweets=3, maxpages=2):
     df_tweets['ih_sentiment'] = sentiments.calc_sentiments(df_tweets, tweet_column='full_text')
 
     hourly_mean = df_tweets['ih_sentiment'].mean()
-    tick = es_client.make_mean_sentiment_tick(value=hourly_mean, timestamp=stored_at, version=ES_TWEET_VERSION)
+    tick = es_client.make_mean_sentiment_tick(
+        value=hourly_mean, timestamp=stored_at, version=ES_TWEET_VERSION, label='mean_hourly_sentiment')
+    tick.save(index='mean_sentiment_ticks')
+
+    # Precompute weighted score:
+    mean_tweet_score = df_tweets['ih_sentiment'] \
+                       * (np.log(df_tweets['author_followers']) + 1) \
+                       * (df_tweets['retweet_count'] + 1)
+    mean_tweet_score = mean_tweet_score.mean()
+
+    tick = es_client.make_mean_sentiment_tick(
+        value=mean_tweet_score, timestamp=stored_at, version=ES_TWEET_VERSION, label='mean_tweet_score')
     tick.save(index='mean_sentiment_ticks')
 
     print('done')
@@ -73,6 +84,7 @@ if __name__ == '__main__':
         }
     else:
         import simplejson as json
+
         with open('secrets.txt', 'r') as f:
             params = json.load(f)
 

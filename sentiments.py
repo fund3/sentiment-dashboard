@@ -56,5 +56,6 @@ def calc_sentiments(df_tweets, tweet_column='full_text'):
         ('best_mnb_estimator', best_mnb_estimator)
     ])
 
-    prediction = pipe_estimator.predict(df_tweets)
+    prediction = pipe_estimator.predict_proba(df_tweets)[:, 1]
+    # print(prediction)
     return prediction

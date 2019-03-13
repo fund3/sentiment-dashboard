@@ -21,6 +21,7 @@ class MeanSentimentTick(Document):
     value = Float()
     timestamp = Date(default_timezone='UTC')
     version = Text()
+    label = Text()
 
     class Index:
         name = 'mean_sentiment_ticks'
@@ -30,11 +31,12 @@ def _get_with_default(obj, key, default=None):
     return obj[key] if key in obj else default
 
 
-def make_mean_sentiment_tick(value, timestamp, version):
+def make_mean_sentiment_tick(value, timestamp, version, label):
     ans = MeanSentimentTick(
         value=value,
         timestamp=timestamp,
-        version=version
+        version=version,
+        label=label
     )
     return ans
 
@@ -132,7 +134,31 @@ def get_mean_hourly_sentiment_ticks(client, max_ticks=1000):
     # TODO: match a specific version
     search = Search(index='mean_sentiment_ticks')\
         .using(client)\
-        .query('match_all')\
+        .query('match', label='mean_hourly_sentiment')\
+        .sort({'timestamp': {'order': 'desc'}})[:max_ticks]
+    search.execute()
+
+    return [
+        {
+            'timestamp': hit.to_dict().get('timestamp', None),
+            'value': hit.to_dict().get('value', None)
+        } for hit in search
+    ]
+
+
+def get_mean_tweet_score_ticks(client, max_ticks=1000):
+    """
+    Get mean hourly sentiment ticks from the Elasticsearch endpoint specified by client.
+
+    :param client: Elasticsearch client object.
+    :param max_ticks: Max length of the hourly ticks series to be retrieved.
+    :return: list of ticks represented as dicts.
+    """
+
+    # TODO: match a specific version
+    search = Search(index='mean_sentiment_ticks')\
+        .using(client)\
+        .query('match', label='mean_tweet_score')\
         .sort({'timestamp': {'order': 'desc'}})[:max_ticks]
     search.execute()
 
