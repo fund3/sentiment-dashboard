@@ -22,8 +22,8 @@ def plot_polarity_vs_time(df, polarity_column='polarity'):
     )
 
     # Format background colors:
-    low_box = bokeh.models.BoxAnnotation(top=0, fill_alpha=0.1, fill_color='red')
-    high_box = bokeh.models.BoxAnnotation(bottom=0, fill_alpha=0.1, fill_color='green')
+    low_box = bokeh.models.BoxAnnotation(top=0.5, fill_alpha=0.1, fill_color='red')
+    high_box = bokeh.models.BoxAnnotation(bottom=0.5, fill_alpha=0.1, fill_color='green')
     p.add_layout(low_box)
     p.add_layout(high_box)
 
@@ -38,7 +38,7 @@ def plot_polarity_vs_time(df, polarity_column='polarity'):
     # TODO: Allow users to select time range.
     now = datetime.datetime.now()
     p.x_range = bokeh.models.Range1d(now - datetime.timedelta(days=3), now + datetime.timedelta(hours=6))
-    p.y_range = bokeh.models.Range1d(-1.0, 1.0)
+    p.y_range = bokeh.models.Range1d(0.0, 1.0)
 
     # p.sizing_mode = "stretch_both"
 
