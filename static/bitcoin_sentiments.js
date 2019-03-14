@@ -39,6 +39,7 @@ angular.module('BitcoinSentimentsApp', [])
             }).then(function(data) {
                 $('#plot_card_spinner').css('display', 'none')
                 Bokeh.embed.embed_item(data['mean_sentiments_plot'], 'mean_sentiments_plot_div')
+                Bokeh.embed.embed_item(data['mean_scores_plot'], 'mean_scores_plot_div')
                 $scope.$apply();
             })
 
@@ -48,6 +49,7 @@ angular.module('BitcoinSentimentsApp', [])
             }).then(function(data) {
 //                $('#plot_card_spinner').css('display', 'none')
 //                Bokeh.embed.embed_item(data['ih_sentiments_plot'], 'mainplot_div')
+                console.log(data)
                 tweetTable.tweets = data['tweets']
                 $scope.$apply();
             })

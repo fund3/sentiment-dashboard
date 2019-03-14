@@ -39,23 +39,22 @@ def index():
 
 @app.route('/get_tweets.json', methods=['GET'])
 def get_tweets():
+    """
+    Via a GET request, returns a JSON object containing a sample of recent tweets.
+    """
+
+    # TODO: client object should be cached between requests.
     params = _get_env_params()
-
     client = Elasticsearch(hosts=[params['es_endpoint']])
+
+    # Get tweets and process:
     tweets = es_client.get_tweets(client)
-
-    # Convert to DataFrame:
     df_tweets = pd.DataFrame.from_records(tweets)
+    df_tweets = df_tweets[df_tweets['full_text'].apply(sentiments.tweet_nonhashtag_ratio) >= 0.8]
+    df_tweets['ih_sentiment'] = sentiments.calc_sentiments(df_tweets, tweet_column='full_text')
 
-    # Polarity plot using inhouse estimator:
-    ih_sentiments = sentiments.calc_sentiments(df_tweets, tweet_column='full_text')
-
-    # Add in-house sentiment to tweet_dicts:
-    for tweet_dict, ih_sent in zip(tweets, ih_sentiments):
-        tweet_dict['ih_sentiment'] = int(ih_sent)
-
-    ans = {'tweets': tweets}
-    return json.dumps(ans)
+    tweets_json = json.loads(df_tweets.to_json(orient='records'))
+    return json.dumps({'tweets': tweets_json})
 
 
 @app.route('/get_mean_sentiments.json', methods=['GET'])
@@ -66,23 +65,29 @@ def get_mean_sentiments():
 
     params = _get_env_params()
 
+    def make_ticks_dataframe(ticks):
+        df = pd.DataFrame.from_records(ticks)
+        df.index = pd.to_datetime(df['timestamp'])
+        df = df.drop(columns='timestamp')
+        df = df.dropna()
+        return df
+
     client = Elasticsearch(hosts=[params['es_endpoint']])
-    ticks = es_client.get_mean_hourly_sentiment_ticks(client)
 
-    # Convert to DataFrame:
-    df = pd.DataFrame.from_records(ticks)
-    df.index = pd.to_datetime(df['timestamp'])
-    df = df.drop(columns='timestamp')
-    df = df.dropna()
+    # Mean Sentiments Ticks:
+    ticks_sentiments = es_client.get_mean_hourly_sentiment_ticks(client)
+    df_sentiments = make_ticks_dataframe(ticks_sentiments)
+    plot_sentiments = plotting.plot_polarity_vs_time(df_sentiments, polarity_column='value')
 
-    # Sentiment plot:
-    mean_sentiments_plot = plotting.plot_polarity_vs_time(df, polarity_column='value')
+    # Mean Scores Ticks:
+    ticks_scores = es_client.get_mean_tweet_score_ticks(client)
+    df_scores = make_ticks_dataframe(ticks_scores)
+    plot_scores = plotting.build_plot_scores(df_scores, values_column='value')
 
-    ans = {
-        'mean_sentiments_plot': bokeh.embed.json_item(mean_sentiments_plot)
-    }
-
-    return json.dumps(ans)
+    return json.dumps({
+        'mean_sentiments_plot': bokeh.embed.json_item(plot_sentiments),
+        'mean_scores_plot': bokeh.embed.json_item(plot_scores),
+    })
 
 
 if __name__ == '__main__':

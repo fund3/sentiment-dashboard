@@ -53,6 +53,7 @@
                         <span class="sr-only">Loading...</span>
                     </div>
                     <div id="mean_sentiments_plot_div"></div>
+                    <div id="mean_scores_plot_div"></div>
                 </div>
                 <div class="card-footer text-muted">
                     Developed by Gonzalo Diaz, in collaboration with Fund3 and The Data Incubator.
@@ -70,7 +71,7 @@
                 <tbody>
                     <tr class="small" data-ng-repeat="tweet in tweetTable.tweets">
                         <td>
-                            <span class="badge badge-pill" data-ng-class="{'true':'badge-success', 'false':'badge-danger'}[tweet.ih_sentiment > 0.5]">{{ '{{tweet.ih_sentiment.toFixed(1)}}' }}</span><br />
+                            <span class="badge badge-pill" data-ng-class="{'true':'badge-success', 'false':'badge-danger'}[tweet.ih_sentiment >= 0.5]">{{ '{{tweet.ih_sentiment.toFixed(1)}}' }}</span><br />
                         </td>
                         <td>
                             {{ '{{tweet.full_text}}' }}<br />

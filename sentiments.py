@@ -1,3 +1,5 @@
+import re
+
 import dill
 import nltk
 from sklearn import base
@@ -28,6 +30,13 @@ class TwitterPreprocessor(base.BaseEstimator, base.TransformerMixin):
         return clean_tweet
 
 
+def tweet_nonhashtag_ratio(tweet):
+    """
+    Calculates the percentage of the tweet left over after removing hastags.
+    """
+    return len(re.sub(r'#\w+', '', tweet)) / len(tweet)
+
+
 def calc_sentiments(df_tweets, tweet_column='full_text'):
     """
     Return a sentiments series
@@ -47,5 +56,6 @@ def calc_sentiments(df_tweets, tweet_column='full_text'):
         ('best_mnb_estimator', best_mnb_estimator)
     ])
 
-    prediction = pipe_estimator.predict(df_tweets)
+    prediction = pipe_estimator.predict_proba(df_tweets)[:, 1]
+    # print(prediction)
     return prediction
