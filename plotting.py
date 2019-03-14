@@ -14,7 +14,7 @@ def plot_polarity_vs_time(df, polarity_column='polarity'):
     """
 
     p = bokeh.plotting.figure(
-        plot_width=800, plot_height=450,
+        plot_width=800, plot_height=250,
         sizing_mode='scale_width',
         tools='xpan,xwheel_zoom',
         x_axis_label='Time (UTC)', y_axis_label='Mean Hourly Sentiment',
@@ -73,7 +73,7 @@ def build_plot_scores(df, values_column):
     """
 
     p = bokeh.plotting.figure(
-        plot_width=800, plot_height=450,
+        plot_width=800, plot_height=250,
         sizing_mode='scale_width',
         tools='xpan,xwheel_zoom',
         x_axis_label='Time (UTC)', y_axis_label='Mean Tweet Scores',
