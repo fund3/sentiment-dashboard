@@ -62,7 +62,7 @@ def tweet_to_estweet(t, stored_at, version):
     return ans
 
 
-def tweepy_to_dict(tweet, *, stored_at=None, version=None):
+def tweepy_to_dict(tweet, stored_at=None, version=None):
     """
     Converts a tweepy Tweet object to a dict.
     """

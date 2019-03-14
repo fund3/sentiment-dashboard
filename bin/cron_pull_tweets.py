@@ -47,17 +47,31 @@ def run_task(params, ntweets=3, maxpages=2):
                                                version=ES_TWEET_VERSION)
                 t.save(index='tweets')
 
-    # Precompute mean sentiment:
     df_tweets = pd.DataFrame.from_records(tweets)
     df_tweets = df_tweets[df_tweets['full_text'].apply(sentiments.tweet_nonhashtag_ratio) >= 0.8]
     df_tweets['ih_sentiment'] = sentiments.calc_sentiments(df_tweets, tweet_column='full_text')
 
+    # Precompute and persist hourly ticks:
+    precompute_mean_sentiment(df_tweets, stored_at)
+    precompute_mean_score(df_tweets, stored_at)
+
+    print('done')
+
+
+def precompute_mean_sentiment(df_tweets, stored_at):
+    """
+    Calculate and persist the mean sentiment for retreived tweets.
+    """
     hourly_mean = df_tweets['ih_sentiment'].mean()
     tick = es_client.make_mean_sentiment_tick(
         value=hourly_mean, timestamp=stored_at, version=ES_TWEET_VERSION, label='mean_hourly_sentiment')
     tick.save(index='mean_sentiment_ticks')
 
-    # Precompute weighted score:
+
+def precompute_mean_score(df_tweets, stored_at):
+    """
+        Calculate and persist the mean score for retreived tweets.
+    """
     mean_tweet_score = df_tweets['ih_sentiment'] \
                        * (np.log(df_tweets['author_followers']) + 1) \
                        * (df_tweets['retweet_count'] + 1)
@@ -66,8 +80,6 @@ def run_task(params, ntweets=3, maxpages=2):
     tick = es_client.make_mean_sentiment_tick(
         value=mean_tweet_score, timestamp=stored_at, version=ES_TWEET_VERSION, label='mean_tweet_score')
     tick.save(index='mean_sentiment_ticks')
-
-    print('done')
 
 
 if __name__ == '__main__':
